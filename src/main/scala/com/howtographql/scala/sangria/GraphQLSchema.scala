@@ -16,10 +16,26 @@ object GraphQLSchema {
 //  )
   implicit val LinkType = deriveObjectType[Unit, Link]() // same as above but using the macros.derive
 
+  // "drying" up the code
+  val Id = Argument("id", IntType)
+  val Ids = Argument("ids", ListInputType(IntType))
+
   val QueryType = ObjectType(
     "Query",
     fields[MyContext, Unit](
-      Field("allLinks", ListType(LinkType), resolve = c => c.ctx.dao.allLinks)
+      Field("allLinks", ListType(LinkType), resolve = c => c.ctx.dao.allLinks),
+      Field(
+        "link",
+        OptionType(LinkType),
+        arguments = Id :: Nil, //List(Argument("id", IntType)),
+        resolve = c => c.ctx.dao.getLink(c.arg[Int]("id"))
+      ),
+      Field(
+        "links",
+        ListType(LinkType),
+        arguments = Ids :: Nil, //List(Argument("ids", ListInputType(IntType))),
+        resolve = c => c.ctx.dao.getLinks(c.arg[Seq[Int]]("ids"))
+      ),
     )
   )
 
