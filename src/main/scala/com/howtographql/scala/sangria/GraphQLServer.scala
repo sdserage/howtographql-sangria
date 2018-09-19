@@ -13,7 +13,6 @@ import sangria.execution._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import sangria.marshalling.sprayJson._
 
-
 object GraphQLServer {
 
   private val dao = DBSchema.createDatabase // Get access to DB

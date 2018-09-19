@@ -15,6 +15,7 @@ object GraphQLSchema {
 //    )
 //  )
   implicit val LinkType = deriveObjectType[Unit, Link]() // same as above but using the macros.derive
+
   val QueryType = ObjectType(
     "Query",
     fields[MyContext, Unit](
