@@ -1,5 +1,5 @@
 package com.howtographql.scala.sangria
 
-class MyContext(dao: DAO) {
+case class MyContext(dao: DAO) {
 
 }
