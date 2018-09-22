@@ -45,7 +45,8 @@ object GraphQLServer {
       query,
       MyContext(dao), // Context object
       variables = vars,
-      operationName = operation
+      operationName = operation,
+      deferredResolver = GraphQLSchema.Resolver
     ).map(OK -> _)
       .recover {
         case error: QueryAnalysisError => BadRequest -> error.resolveError
