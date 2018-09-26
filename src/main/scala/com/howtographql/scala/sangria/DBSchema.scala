@@ -26,7 +26,28 @@ object DBSchema {
     def * = (id, url, description, createdAt).mapTo[Link]
   }
 
+  class UserTable(tag: Tag) extends Table[User](tag, _tableName = "USERS") {
+    def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("NAME")
+    def email = column[String]("EMAIL", O.Unique)
+    def password = column[String]("PASSWORD")
+    def createdAt = column[DateTime]("CREATED_AT")
+
+    def * = (id, name, email, password, createdAt).mapTo[User]
+  }
+
+  class VoteTable(tag: Tag) extends Table[Vote](tag, _tableName = "VOTES") {
+    def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
+    def createdAt = column[DateTime]("CREATED_AT")
+    def userId = column[Int]("USER_ID")
+    def linkId = column[Int]("LINK_ID")
+
+    def * = (id, createdAt, userId, linkId).mapTo[Vote]
+  }
+
   val Links = TableQuery[LinksTable]
+//  val Users = UserQuery[LinksTable]
+//  val Votes = VoteQuery[VoteTable]
 
   /**
     * Load schema and populate sample data withing this Sequence od DBActions
