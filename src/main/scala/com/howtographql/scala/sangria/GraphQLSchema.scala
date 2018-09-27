@@ -22,33 +22,44 @@ object GraphQLSchema {
     }
   )
 
-  val LinkType = deriveObjectType[Unit, Link](
-    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+  val IdentifiableType = InterfaceType(
+    "Identifiable",
+    fields[Unit, Identifiable](
+      Field("id", IntType, resolve = _.value.id)
+    )
   )
 
-  implicit val linkHasId = HasId[Link, Int](_.id)
+  implicit val LinkType = deriveObjectType[Unit, Link](
+    Interfaces(IdentifiableType)
+  )
+
+//  val LinkType = deriveObjectType[Unit, Link](
+//    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+//  )
 
   val linksFetcher = Fetcher(
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getLinks(ids)
   )
 
+//  val UserType = deriveObjectType[Unit, User](
+//    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+//  )
 
-
-  val UserType = deriveObjectType[Unit, User](
-    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+  implicit val UserType = deriveObjectType[Unit, User](
+    Interfaces(IdentifiableType)
   )
-
-  implicit val userHasId = HasId[User, Int](_.id)
 
   val usersFetcher = Fetcher(
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getUsers(ids)
   )
 
-  val VoteType = deriveObjectType[Unit, Vote](
-    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
-  )
+//  val VoteType = deriveObjectType[Unit, Vote](
+//    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
+//  )
 
-  implicit val voteHasId = HasId[Vote, Int](_.id)
+  implicit val VoteType = deriveObjectType[Unit, Vote](
+    Interfaces(IdentifiableType)
+  )
 
   val votesFetcher = Fetcher(
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getVotes(ids)
