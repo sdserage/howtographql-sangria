@@ -14,6 +14,12 @@ class DAO(db: Database) {
 //    Links.filter(_.id === id).result.headOption
 //  )
 
+  def getLinksByUserIds(ids: Seq[Int]): Future[Seq[Link]] = {
+    db.run {
+      Links.filter(_.postedBy inSet ids).result
+    }
+  }
+
   def getLinks(ids: Seq[Int]) = db.run(
     Links.filter(_.id inSet ids).result
   )

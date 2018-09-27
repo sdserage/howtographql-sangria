@@ -3,7 +3,7 @@ package com.howtographql.scala.sangria
 import akka.http.scaladsl.model.DateTime
 import sangria.schema.{Field, ListType, ObjectType}
 import models._
-import sangria.execution.deferred.{DeferredResolver, Fetcher, HasId}
+import sangria.execution.deferred._
 import sangria.schema._
 import sangria.macros.derive._
 import sangria.ast.StringValue
@@ -37,8 +37,11 @@ object GraphQLSchema {
 //    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
 //  )
 
-  val linksFetcher = Fetcher(
-    (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getLinks(ids)
+  val linkByUserRel = Relation[Link, Int]("byUser", l => Seq(l.postedBy))
+
+  val linksFetcher = Fetcher.rel(
+    (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getLinks(ids),
+    (ctx: MyContext, ids: RelationIds[Link]) => ctx.dao.getLinksByUserIds(ids(linkByUserRel))
   )
 
 //  val UserType = deriveObjectType[Unit, User](
