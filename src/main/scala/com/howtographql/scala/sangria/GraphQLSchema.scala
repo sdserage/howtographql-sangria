@@ -29,8 +29,11 @@ object GraphQLSchema {
     )
   )
 
-  implicit val LinkType = deriveObjectType[Unit, Link](
-    Interfaces(IdentifiableType)
+  lazy val LinkType: ObjectType[Unit, Link] = deriveObjectType[Unit, Link](
+    Interfaces(IdentifiableType),
+    ReplaceField("postedBy",
+      Field("postedBy", UserType, resolve = c => usersFetcher.defer(c.value.postedBy))
+    )
   )
 
 //  val LinkType = deriveObjectType[Unit, Link](
@@ -48,8 +51,12 @@ object GraphQLSchema {
 //    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
 //  )
 
-  implicit val UserType = deriveObjectType[Unit, User](
-    Interfaces(IdentifiableType)
+  lazy val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User](
+    Interfaces(IdentifiableType),
+    AddFields(
+      Field("links", ListType(LinkType),
+        resolve = c =>  linksFetcher.deferRelSeq(linkByUserRel, c.value.id))
+    )
   )
 
   val usersFetcher = Fetcher(
@@ -60,7 +67,7 @@ object GraphQLSchema {
 //    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
 //  )
 
-  implicit val VoteType = deriveObjectType[Unit, Vote](
+  lazy val VoteType: ObjectType[Unit, Vote] = deriveObjectType[Unit, Vote](
     Interfaces(IdentifiableType)
   )
 
