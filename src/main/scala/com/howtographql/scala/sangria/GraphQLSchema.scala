@@ -33,6 +33,9 @@ object GraphQLSchema {
     Interfaces(IdentifiableType),
     ReplaceField("postedBy",
       Field("postedBy", UserType, resolve = c => usersFetcher.defer(c.value.postedBy))
+    ),
+    AddFields(
+      Field("votes", ListType(VoteType), resolve = c => votesFetcher.deferRelSeq(voteByLinkRel, c.value.id))
     )
   )
 
@@ -54,8 +57,8 @@ object GraphQLSchema {
   lazy val UserType: ObjectType[Unit, User] = deriveObjectType[Unit, User](
     Interfaces(IdentifiableType),
     AddFields(
-      Field("links", ListType(LinkType),
-        resolve = c =>  linksFetcher.deferRelSeq(linkByUserRel, c.value.id))
+      Field("links", ListType(LinkType), resolve = c =>  linksFetcher.deferRelSeq(linkByUserRel, c.value.id)),
+      Field("votes", ListType(VoteType), resolve = c =>  votesFetcher.deferRelSeq(voteByUserRel, c.value.id))
     )
   )
 
@@ -63,16 +66,20 @@ object GraphQLSchema {
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getUsers(ids)
   )
 
-//  val VoteType = deriveObjectType[Unit, Vote](
-//    ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
-//  )
+  val voteByUserRel = Relation[Vote, Int]("byUser", v => Seq(v.userId))
+  val voteByLinkRel = Relation[Vote, Int]("byLink", v => Seq(v.linkId))
 
   lazy val VoteType: ObjectType[Unit, Vote] = deriveObjectType[Unit, Vote](
-    Interfaces(IdentifiableType)
+    Interfaces(IdentifiableType),
+    ExcludeFields("userId", "linkId"),
+    AddFields(Field("user",  UserType, resolve = c => usersFetcher.defer(c.value.userId))),
+    AddFields(Field("link",  LinkType, resolve = c => linksFetcher.defer(c.value.linkId)))
   )
 
-  val votesFetcher = Fetcher(
-    (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getVotes(ids)
+
+  val votesFetcher = Fetcher.rel(
+    (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getVotes(ids),
+    (ctx: MyContext, ids: RelationIds[Vote]) => ctx.dao.getVotesByRelationIds(ids)
   )
 
   val Resolver = DeferredResolver.fetchers(linksFetcher, usersFetcher, votesFetcher)
@@ -97,7 +104,6 @@ object GraphQLSchema {
         arguments = Ids :: Nil, //List(Argument("ids", ListInputType(IntType))),
         resolve = c => linksFetcher.deferSeq(c.arg(Ids))
       ),
-      Field("allUsers", ListType(UserType), resolve = c => c.ctx.dao.allUsers),
       Field(
         "user",
         OptionType(UserType),
@@ -110,7 +116,6 @@ object GraphQLSchema {
         arguments = Ids :: Nil,
         resolve = c => usersFetcher.deferSeq(c.arg(Ids))
       ),
-      Field("allVotes", ListType(VoteType), resolve = c => c.ctx.dao.allVotes),
       Field(
         "vote",
         OptionType(VoteType),
