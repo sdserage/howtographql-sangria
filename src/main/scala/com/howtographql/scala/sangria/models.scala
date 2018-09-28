@@ -22,4 +22,8 @@ package object models {
   object Identifiable {
     implicit def hasId[T <: Identifiable]: HasId[T, Int] = HasId(_.id)
   }
+
+  case class AuthProviderEmail(email: String, password: String)
+
+  case class AuthProviderSignupData(email: AuthProviderEmail)
 }

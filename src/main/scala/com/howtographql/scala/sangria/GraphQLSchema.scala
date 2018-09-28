@@ -7,8 +7,14 @@ import sangria.execution.deferred._
 import sangria.schema._
 import sangria.macros.derive._
 import sangria.ast.StringValue
+import sangria.marshalling.sprayJson._
+import spray.json.DefaultJsonProtocol._
 
 object GraphQLSchema {
+
+  implicit val authProviderEmailFormat = jsonFormat2(AuthProviderEmail)
+  implicit val authProviderSignupDataFormat = jsonFormat1(AuthProviderSignupData)
+
   implicit val GraphQLDateTime = ScalarType[DateTime](
     "DateTime",
     coerceOutput = (dt, _) => dt.toString,
@@ -88,6 +94,26 @@ object GraphQLSchema {
   val Id = Argument("id", IntType)
   val Ids = Argument("ids", ListInputType(IntType))
 
+  implicit val AuthProviderEmailInputType: InputObjectType[AuthProviderEmail] = deriveInputObjectType[AuthProviderEmail](
+    InputObjectTypeName("AUTH_PROVIDER_EMAIL")
+  )
+
+  lazy val AuthProviderSignupDataInputType: InputObjectType[AuthProviderSignupData] = deriveInputObjectType[AuthProviderSignupData]()
+
+  val NameArg = Argument("name", StringType)
+  val AuthProviderArg = Argument("authProvider", AuthProviderSignupDataInputType)
+
+  val Mutation = ObjectType(
+    "Mutation",
+    fields[MyContext, Unit](
+      Field("createUser",
+        UserType,
+        arguments = NameArg :: AuthProviderArg :: Nil,
+        resolve = c => c.ctx.dao.createUser(c.arg(NameArg), c.arg(AuthProviderArg))
+      )
+    )
+  )
+
   val QueryType = ObjectType(
     "Query",
     fields[MyContext, Unit](
@@ -131,5 +157,5 @@ object GraphQLSchema {
     )
   )
 
-  val SchemaDefinition = Schema(QueryType)
+  val SchemaDefinition = Schema(QueryType, Some(Mutation))
 }
