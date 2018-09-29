@@ -102,6 +102,9 @@ object GraphQLSchema {
 
   val NameArg = Argument("name", StringType)
   val AuthProviderArg = Argument("authProvider", AuthProviderSignupDataInputType)
+  val UrlArg = Argument("url", StringType)
+  val DescriptionArg = Argument("description", StringType)
+  val PostedByArg = Argument("postedBy", IntType)
 
   val Mutation = ObjectType(
     "Mutation",
@@ -110,6 +113,11 @@ object GraphQLSchema {
         UserType,
         arguments = NameArg :: AuthProviderArg :: Nil,
         resolve = c => c.ctx.dao.createUser(c.arg(NameArg), c.arg(AuthProviderArg))
+      ),
+      Field("createLink",
+        LinkType,
+        arguments = UrlArg :: DescriptionArg :: PostedByArg :: Nil,
+        resolve = c => c.ctx.dao.createLink(c.arg(UrlArg), c.arg(DescriptionArg), c.arg(PostedByArg))
       )
     )
   )

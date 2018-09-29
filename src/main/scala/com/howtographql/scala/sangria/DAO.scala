@@ -42,7 +42,7 @@ class DAO(db: Database) {
     )
 
   def createUser(name: String, authProvider: AuthProviderSignupData): Future[User] = {
-    val newUser = User(0, name, authProvider.email.email, authProvider.email.password, DateTime.now)
+    val newUser = User(0, name, authProvider.email.email, authProvider.email.password)
 
     val insertAndReturnUserQuery = (Users returning Users.map(_.id)) into {
       (user, id) => user.copy(id = id)
@@ -51,6 +51,17 @@ class DAO(db: Database) {
     db.run {
       insertAndReturnUserQuery += newUser
     }
+  }
 
+  def createLink(url: String, description: String, postedBy: Int): Future[Link] = {
+    val newLink = Link(0, url, description, postedBy)
+
+    val insertAndReturnLinkQuery = (Links returning Links.map(_.id)) into {
+      (link, id) => link.copy(id = id)
+    }
+
+    db.run {
+      insertAndReturnLinkQuery += newLink
+    }
   }
 }

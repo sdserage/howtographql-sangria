@@ -11,9 +11,9 @@ package object models {
     override def errorMessage: String = "Error during parsing DateTime"
   }
 
-  case class User(id: Int, name: String, email: String, password: String, createdAt: DateTime) extends Identifiable
+  case class User(id: Int, name: String, email: String, password: String, createdAt: DateTime = DateTime.now) extends Identifiable
 
-  case class Vote(id: Int, createdAt: DateTime, userId: Int, linkId: Int) extends Identifiable
+  case class Vote(id: Int, createdAt: DateTime = DateTime.now, userId: Int, linkId: Int) extends Identifiable
 
   trait Identifiable {
     val id: Int
