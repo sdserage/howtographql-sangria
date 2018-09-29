@@ -105,6 +105,8 @@ object GraphQLSchema {
   val UrlArg = Argument("url", StringType)
   val DescriptionArg = Argument("description", StringType)
   val PostedByArg = Argument("postedBy", IntType)
+  val UserIdArg = Argument("userId", IntType)
+  val LinkIdArg = Argument("linkId", IntType)
 
   val Mutation = ObjectType(
     "Mutation",
@@ -118,6 +120,11 @@ object GraphQLSchema {
         LinkType,
         arguments = UrlArg :: DescriptionArg :: PostedByArg :: Nil,
         resolve = c => c.ctx.dao.createLink(c.arg(UrlArg), c.arg(DescriptionArg), c.arg(PostedByArg))
+      ),
+      Field("createVote",
+        VoteType,
+        arguments = UserIdArg :: LinkIdArg :: Nil,
+        resolve = c => c.ctx.dao.createVote(c.arg(UserIdArg), c.arg(LinkIdArg))
       )
     )
   )
