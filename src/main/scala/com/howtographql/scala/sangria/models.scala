@@ -26,4 +26,8 @@ package object models {
   case class AuthProviderEmail(email: String, password: String)
 
   case class AuthProviderSignupData(email: AuthProviderEmail)
+
+  case class AuthenticationException(message: String) extends Exception(message)
+
+  case class AuthorizationException(message: String) extends Exception(message)
 }

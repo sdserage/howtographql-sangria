@@ -12,10 +12,17 @@ import sangria.ast.Document
 import sangria.execution._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import sangria.marshalling.sprayJson._
+import com.howtographql.scala.sangria.models.{AuthenticationException, AuthorizationException}
+import sangria.execution.{ExceptionHandler => EHandler, _}
 
 object GraphQLServer {
 
   private val dao = DBSchema.createDatabase // Get access to DB
+
+  val ErrorHandler = EHandler {
+    case (_, AuthenticationException(message)) ⇒ HandledException(message)
+    case (_, AuthorizationException(message)) ⇒ HandledException(message)
+  }
 
   def endpoint(requestJSON: JsValue)(implicit ec: ExecutionContext): Route = { // endpoint that returns a Route, expects a JSON object
 
@@ -46,7 +53,8 @@ object GraphQLServer {
       MyContext(dao), // Context object
       variables = vars,
       operationName = operation,
-      deferredResolver = GraphQLSchema.Resolver
+      deferredResolver = GraphQLSchema.Resolver,
+      exceptionHandler = ErrorHandler
     ).map(OK -> _)
       .recover {
         case error: QueryAnalysisError => BadRequest -> error.resolveError
