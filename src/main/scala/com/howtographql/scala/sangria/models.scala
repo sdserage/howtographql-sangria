@@ -3,6 +3,7 @@ package com.howtographql.scala.sangria
 import akka.http.scaladsl.model.DateTime
 import sangria.execution.deferred.HasId
 import sangria.validation.Violation
+import sangria.execution.FieldTag
 
 package object models {
   case class Link(id: Int, url: String, description: String, postedBy: Int, createdAt: DateTime = DateTime.now) extends Identifiable
@@ -30,4 +31,6 @@ package object models {
   case class AuthenticationException(message: String) extends Exception(message)
 
   case class AuthorizationException(message: String) extends Exception(message)
+
+  case object Authorized extends FieldTag
 }
