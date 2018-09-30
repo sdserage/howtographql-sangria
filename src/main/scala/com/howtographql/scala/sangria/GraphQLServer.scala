@@ -47,14 +47,15 @@ object GraphQLServer {
   }
 
   private def executeGraphQLQuery(query: Document, operation: Option[String], vars: JsObject)(implicit ec: ExecutionContext) = {
-    Executor.execute( // Execute the query
-      GraphQLSchema.SchemaDefinition, // Our Schema
+    Executor.execute(
+      GraphQLSchema.SchemaDefinition,
       query,
-      MyContext(dao), // Context object
+      MyContext(dao),
       variables = vars,
       operationName = operation,
       deferredResolver = GraphQLSchema.Resolver,
-      exceptionHandler = ErrorHandler
+      exceptionHandler = ErrorHandler,
+      middleware = AuthMiddleware :: Nil
     ).map(OK -> _)
       .recover {
         case error: QueryAnalysisError => BadRequest -> error.resolveError
